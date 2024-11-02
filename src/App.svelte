@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Editor from "./lib/Editor.svelte";
 	import FilePanel from "./lib/FilePanel.svelte";
+    import ScratchPanel from "./lib/ScratchPanel.svelte";
 	import Vis from "./lib/Vis.svelte";
 </script>
 
@@ -11,7 +12,9 @@
 </aside>
 <Editor />
 <Vis />
-<aside id="panel-right" class="panel"></aside>
+<aside id="panel-right" class="panel">
+	<ScratchPanel/>
+</aside>
 
 <footer></footer>
 

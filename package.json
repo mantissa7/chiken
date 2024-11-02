@@ -27,6 +27,7 @@
 		"@duckdb/duckdb-wasm": "^1.29.0",
 		"@electric-sql/pglite": "^0.2.12",
 		"codemirror": "^6.0.1",
+		"idb-keyval": "^6.2.1",
 		"papaparse": "^5.4.1",
 		"xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
 	}

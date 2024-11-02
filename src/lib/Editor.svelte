@@ -6,25 +6,32 @@
   import { sql } from "@codemirror/lang-sql";
   import { onMount } from "svelte";
   import { store } from "./store";
-  import { app } from "./state.svelte";
+  import { appState } from "./state.svelte";
+  import { get, set } from "idb-keyval";
 
   let editor: HTMLDivElement;
 
   const runQuery = (target: EditorView) => {
     const qry = target.state.doc.toString();
     store.query(qry).then((tbl) => {
+      
       const result = tbl.toArray().map((row) => row.toArray());
 
-      app.currentTable = [tbl.schema.names, ...result];
+      appState.currentTable = [tbl.schema.names, ...result];
     });
 
     return true;
   };
 
-  onMount(() => {
+  onMount(async () => {
     new EditorView({
-      doc: `select\t* \nfrom\t"flights.csv"`,
+      doc: await get("scratch"),
       extensions: [
+        EditorView.updateListener.of((v) => {
+          if (v.docChanged) {
+            set("scratch", v.state.doc.toString());
+          }
+        }),
         keymap.of([
           // indentWithTab,
           { key: "Tab", preventDefault: true, run: insertTab },

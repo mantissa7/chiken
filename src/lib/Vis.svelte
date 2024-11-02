@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Papa from "papaparse";
-	import { app, type ChikenFile } from "./state.svelte";
+	import { appState, type FileMeta } from "./state.svelte";
 	import { store } from "./store";
 
 	let dragover = $state(false);
@@ -11,42 +11,52 @@
 	};
 
 	const handleFile = async (file: File) => {
-		console.log(`file name = ${file.name}`);
-		console.log(file.type);
-		let tableData = [];
+		console.log(`file name = ${file.name} [Type: ${file.type}]`);
 
 		switch (file.type) {
 			case "text/csv": {
 				const t = await file.text();
-				const ret = await parseCSV(t);
-				const f: ChikenFile = {
-					name: file.name,
-					type: file.type,
-					data: ret.data,
-					text: t,
-				};
-				app.files.push(f);
-				store.import(f);
 
-				tableData = ret.data;
+				appState.files.push(file.name);
+				store.import(file.name, t);
+
+				const ret = await parseCSV(t);
+				appState.currentTable = ret.data as unknown[][];
 				break;
 			}
-		}
+			default: {
+				if (file.name.endsWith(".db")) {
+					const opfsRoot = await navigator.storage.getDirectory();
 
-		app.currentTable = tableData;
+					const fileHandle = await opfsRoot.getFileHandle(
+						"chiken.db",
+						{
+							create: true,
+						},
+					);
+					const w = await fileHandle.createWritable();
+
+					await w.write(file);
+					// await w.write(await file.arrayBuffer());
+
+					await w.close();
+					// console.log(await file.arrayBuffer());
+				}
+			}
+		}
 	};
 
-	const handleDragEnter = (e) => {
+	const handleDragEnter = (e: DragEvent) => {
 		dragover = true;
 	};
 
-	const handleDrag = (e) => {
+	const handleDrag = (e: DragEvent) => {
 		e.preventDefault();
 		// console.log(e.dataTransfer);
 		dragover = true;
 	};
 
-	const handleDragLeave = (e) => {
+	const handleDragLeave = (e: DragEvent) => {
 		e.preventDefault();
 		dragover = false;
 	};
@@ -84,18 +94,19 @@
 	ondragover={handleDrag}
 	ondragleave={handleDragLeave}
 	ondrop={handleDrop}
+	role="table"
 >
 	<div class={`drag-guide ${dragover ? "show" : ""}`}>Drop CSV/XLS here</div>
 	<table>
 		<thead>
 			<tr>
-				{#each app.currentTable[0] as col}
+				{#each appState.currentTable[0] as col}
 					<th>{col}</th>
 				{/each}
 			</tr>
 		</thead>
 		<tbody>
-			{#each app.currentTable.slice(1) as row}
+			{#each appState.currentTable.slice(1) as row}
 				<tr>
 					{#each row as col}
 						<td>{col}</td>
@@ -113,6 +124,7 @@
 		padding: 16px;
 		background-color: #242424;
 		position: relative;
+		overflow: auto;
 
 		& .drag-guide {
 			opacity: 0;

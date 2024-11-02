@@ -1,20 +1,23 @@
-export type ChikenFile = {
+export type FileMeta = {
 	name: string;
 	type: string;
-	text: string;
-	data?: unknown[];
+	path: string;
 };
 
 export type ChikenState = {
-	currentTable: unknown[];
-	files: ChikenFile[];
+	currentTable: unknown[][];
+	scratch: string[];
+	files: string[];
 };
 
-export const app = $state<ChikenState>({
+export const appState = $state<ChikenState>({
 	currentTable: [],
+	scratch: [],
 	files: [],
 });
 
 // $state.snapshot
 
-// export default state;
+export const load = async () => {}
+
+// export const load = async () => {}
