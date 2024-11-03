@@ -20,9 +20,6 @@
                 {leaf}
             </button>
         </li>
-        <!-- {#if branch.children?.length}
-            <svelte:self data={branch.children} />
-        {/if} -->
     {/each}
 </ul>
 
@@ -35,7 +32,6 @@
         li {
             cursor: pointer;
             padding: 0 10px;
-            height: 20px;
             user-select: none;
             display: grid;
             align-items: center;
@@ -46,6 +42,10 @@
 
             &.active {
                 background-color: #242424;
+            }
+            
+            & button {
+                all: unset;
             }
         }
     }

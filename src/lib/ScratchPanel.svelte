@@ -1,18 +1,28 @@
 <script lang="ts">
     import { appState } from "./state.svelte";
+    import { store } from "./store";
     import Tree from "./Tree.svelte";
 
-    let active = $state<string | null>(null);
-
     const setActive = (path: string) => {
-        active = path;
+        appState.activeScratch = path;
+    };
+
+    const handleNewScratch = async (e: MouseEvent) => {
+        e.preventDefault();
+        const newName = `scratch ${appState.scratch.length + 1}`;
+        await store.persistScratch(newName, "");
+        appState.activeScratch = newName;
     };
 </script>
 
 <div>
-    <div class="title">Scratch Pad {active}</div>
-    <Tree data={appState.scratch} onSetActive={setActive} {active} />
-    <div style="text-align: center; width: 100%;">+</div>
+    <div class="title">Scratch Pad</div>
+    <Tree
+        data={appState.scratch}
+        onSetActive={setActive}
+        active={appState.activeScratch}
+    />
+    <button onclick={handleNewScratch}>New Scratch</button>
 </div>
 
 <style>

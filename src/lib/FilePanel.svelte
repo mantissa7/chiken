@@ -5,9 +5,7 @@
 
 <div>
     <div class="title">Files</div>
-    <ul>
-        <Tree data={appState.files} />
-    </ul>
+    <Tree data={appState.files} />
 </div>
 
 <style>
@@ -15,5 +13,6 @@
         padding: 0 10px;
         border-bottom: 1px solid #fff2;
         font-weight: bold;
+        margin-bottom: 3px;
     }
 </style>

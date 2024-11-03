@@ -5,12 +5,14 @@ export type FileMeta = {
 };
 
 export type ChikenState = {
+	activeScratch: string;
 	currentTable: unknown[][];
 	scratch: string[];
 	files: string[];
 };
 
 export const appState = $state<ChikenState>({
+	activeScratch: 'default',
 	currentTable: [],
 	scratch: [],
 	files: [],

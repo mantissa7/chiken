@@ -1,102 +1,9 @@
 <script lang="ts">
-	import Papa from "papaparse";
-	import { appState, type FileMeta } from "./state.svelte";
-	import { store } from "./store";
-
-	let dragover = $state(false);
-
-	const parseCSV = async (text: string) => {
-		const parsed = Papa.parse(text, {});
-		return parsed;
-	};
-
-	const handleFile = async (file: File) => {
-		console.log(`file name = ${file.name} [Type: ${file.type}]`);
-
-		switch (file.type) {
-			case "text/csv": {
-				const t = await file.text();
-
-				appState.files.push(file.name);
-				store.import(file.name, t);
-
-				const ret = await parseCSV(t);
-				appState.currentTable = ret.data as unknown[][];
-				break;
-			}
-			default: {
-				if (file.name.endsWith(".db")) {
-					const opfsRoot = await navigator.storage.getDirectory();
-
-					const fileHandle = await opfsRoot.getFileHandle(
-						"chiken.db",
-						{
-							create: true,
-						},
-					);
-					const w = await fileHandle.createWritable();
-
-					await w.write(file);
-					// await w.write(await file.arrayBuffer());
-
-					await w.close();
-					// console.log(await file.arrayBuffer());
-				}
-			}
-		}
-	};
-
-	const handleDragEnter = (e: DragEvent) => {
-		dragover = true;
-	};
-
-	const handleDrag = (e: DragEvent) => {
-		e.preventDefault();
-		// console.log(e.dataTransfer);
-		dragover = true;
-	};
-
-	const handleDragLeave = (e: DragEvent) => {
-		e.preventDefault();
-		dragover = false;
-	};
-
-	const handleDrop = (e: DragEvent) => {
-		e.preventDefault();
-		dragover = false;
-
-		if (e.dataTransfer?.items) {
-			// Use DataTransferItemList interface to access the file(s)
-			[...e.dataTransfer.items].forEach((item, i) => {
-				// If dropped items aren't files, reject them
-				if (item.kind === "file") {
-					const file = item.getAsFile();
-					if (!file) {
-						console.warn(`No File Found for ${item.type}`);
-
-						return;
-					}
-					handleFile(file);
-				}
-			});
-		} else {
-			// Use DataTransfer interface to access the file(s)
-			[...(e.dataTransfer?.files ?? [])].forEach((file, i) => {
-				handleFile(file);
-			});
-		}
-	};
+	import DropZone from "./DropZone.svelte";
+	import { appState } from "./state.svelte";
 </script>
 
-<div
-	id="vis"
-	ondragenter={handleDragEnter}
-	ondragover={handleDrag}
-	ondragleave={handleDragLeave}
-	ondrop={handleDrop}
-	role="table"
->
-	<div class={`drag-guide ${dragover ? "show" : ""}`}>Drop CSV/XLS here</div>
+<div id="vis">
 	<table>
 		<thead>
 			<tr>
@@ -125,19 +32,5 @@
 		background-color: #242424;
 		position: relative;
 		overflow: auto;
-
-		& .drag-guide {
-			opacity: 0;
-			pointer-events: none;
-			position: absolute;
-			inset: 0;
-			border: 2px dotted #fff;
-			display: grid;
-			place-items: center;
-
-			&.show {
-				opacity: 1;
-			}
-		}
 	}
 </style>

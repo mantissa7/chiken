@@ -3,18 +3,24 @@ import App from "./App.svelte";
 import { mount } from "svelte";
 import { store } from "./lib/store";
 import { appState } from "./lib/state.svelte";
+import { sleep } from "./lib/util";
 
 const init = async () => {
-	store.init();
-	const files = await store.fileMeta();
-	console.log(files);
+	// observe files using polling
+	// implement FileSystemObserver when it lands in Baseline
 	
-	appState.files = files.tables;
-	appState.scratch = files.scratch;
+	while (true) {
+		
+		const files = await store.fileMeta();
+		
+		appState.files = files.tables;
+		appState.scratch = files.scratch;
+	
+		await sleep(1000);
+	}
 };
 
 init();
-
 
 const app = mount(App, {
 	target: document.getElementById("app")!,

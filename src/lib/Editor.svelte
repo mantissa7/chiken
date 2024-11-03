@@ -1,5 +1,6 @@
 <script lang="ts">
   import { basicSetup } from "codemirror";
+  import { EditorState } from "@codemirror/state";
   import { EditorView, keymap } from "@codemirror/view";
   import { insertTab, indentLess } from "@codemirror/commands";
   import { oneDark } from "@codemirror/theme-one-dark";
@@ -7,29 +8,17 @@
   import { onMount } from "svelte";
   import { store } from "./store";
   import { appState } from "./state.svelte";
-  import { get, set } from "idb-keyval";
+  // import { get, set } from "idb-keyval";
 
-  let editor: HTMLDivElement;
-
-  const runQuery = (target: EditorView) => {
-    const qry = target.state.doc.toString();
-    store.query(qry).then((tbl) => {
-      
-      const result = tbl.toArray().map((row) => row.toArray());
-
-      appState.currentTable = [tbl.schema.names, ...result];
-    });
-
-    return true;
-  };
-
-  onMount(async () => {
-    new EditorView({
-      doc: await get("scratch"),
+  const makeEditorState = async (filename: string) => {
+    return EditorState.create({
+      doc: await store.readScratch(filename),
       extensions: [
         EditorView.updateListener.of((v) => {
           if (v.docChanged) {
-            set("scratch", v.state.doc.toString());
+            // onUpdate(v.state.doc.toString());
+            store.persistScratch(filename, v.state.doc.toString());
+            // set("scratch", v.state.doc.toString());
           }
         }),
         keymap.of([
@@ -43,12 +32,38 @@
         oneDark,
         sql(),
       ],
-      parent: editor,
     });
+  };
+
+  let editorDiv: HTMLDivElement;
+  let editor: EditorView;
+
+  const runQuery = (target: EditorView) => {
+    const qry = target.state.doc.toString();
+    store.query(qry).then((tbl) => {
+      const result = tbl.toArray().map((row) => row.toArray());
+
+      appState.currentTable = [tbl.schema.names, ...result];
+    });
+
+    return true;
+  };
+
+  onMount(async () => {
+    editor = new EditorView({
+      state: await makeEditorState("default"),
+      parent: editorDiv,
+    });
+  });
+
+  $effect(() => {
+    makeEditorState(appState.activeScratch).then(state => {
+      editor.setState(state);
+    })
   });
 </script>
 
-<div id="editor" bind:this={editor}></div>
+<div id="editor" bind:this={editorDiv}></div>
 
 <style>
   #editor {

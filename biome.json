@@ -8,11 +8,16 @@
 		"rules": {
 			"recommended": true,
 			"style": {
-				"noNonNullAssertion": "off"
+				"noNonNullAssertion": "off",
+				"useConst": "warn"
+			},
+			"suspicious": {
+				"noExplicitAny": "warn"
 			}
 		}
 	},
 	"formatter": {
-		"indentStyle": "tab"
+		"indentStyle": "tab",
+		"lineWidth": 120
 	}
 }
