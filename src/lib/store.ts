@@ -73,7 +73,7 @@ export class Store {
 
 	private async registerTables() {
 		const opfsRoot = await navigator.storage.getDirectory();
-		const tables = await opfsRoot.getDirectoryHandle(DIR.TABLES);
+		const tables = await opfsRoot.getDirectoryHandle(DIR.TABLES, { create: true });
 
 		for await (const k of tables.keys()) {
 			this.registerTable(k);
