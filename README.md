@@ -11,4 +11,6 @@ Simple drag 'n' drop data inspector
 
 ---
 
-Waiting on https://github.com/duckdb/duckdb-wasm/pull/1856
+# Under Active Development
+
+
