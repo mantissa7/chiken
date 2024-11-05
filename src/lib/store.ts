@@ -71,6 +71,12 @@ export class Store {
 		// await this.db.registerFileHandle(name, fileHandle, duckdb.DuckDBDataProtocol.BROWSER_FSACCESS, true);
 	}
 
+	public async deleteTable(name: string) {
+		const opfsRoot = await navigator.storage.getDirectory();
+		const tables = await opfsRoot.getDirectoryHandle(DIR.TABLES);
+		tables.removeEntry(name);
+	}
+
 	private async registerTables() {
 		const opfsRoot = await navigator.storage.getDirectory();
 		const tables = await opfsRoot.getDirectoryHandle(DIR.TABLES, { create: true });
@@ -150,6 +156,7 @@ export class Store {
 		await this.registerTable(file.name);
 	}
 
+	// Save file and register external file in DuckDB
 	public async import(filename: string, contents: string) {
 		await this.saveFile(filename, DIR.TABLES, contents);
 		await this.registerTable(filename);
@@ -165,7 +172,7 @@ export class Store {
 
 	public async query(qry: string) {
 		try {
-			console.log("tablers", await this.parseTablesFromSQL(qry));
+			// console.log("tablers", await this.parseTablesFromSQL(qry));
 
 			return await this.conn.query(qry);
 		} catch (error) {
@@ -181,7 +188,8 @@ export class Store {
 		}
 	}
 
-	private async parseTablesFromSQL(sql: string) {
+	// Tokenise SQL and return table names
+	private async parseTablesFromSQL(sql: string): Promise<Set<string>> {
 		const tokens = await this.db.tokenize(sql);
 
 		const tbls = tokens.offsets.map((pos, idx) => {
@@ -199,13 +207,13 @@ export class Store {
 		return s;
 	}
 
+	// Read table schema
 	public async schema(table: string) {
 		const q = await this.conn.query(`
-			select	 table_name,
-					 json_group_object(column_name, data_type) as schema
-			from	 information_schema.columns
-
-			group by table_name
+			select	  table_name,
+					      json_group_object(column_name, data_type) as schema
+			from	    information_schema.columns
+			group by 	table_name
 		`);
 
 		return q.toArray().map((row) => row.toJSON());

@@ -1,7 +1,9 @@
 <script lang="ts">
+    import Panel from "./Panel.svelte";
     import { appState } from "./state.svelte";
     import { store } from "./store";
-    import Tree from "./Tree.svelte";
+    import Leaf from "./tree/Leaf.svelte";
+    import Tree from "./tree/Tree.svelte";
 
     const setActive = (path: string) => {
         appState.activeScratch = path;
@@ -15,20 +17,16 @@
     };
 </script>
 
-<div>
-    <div class="title">Scratch Pad</div>
-    <Tree
-        data={appState.scratch}
-        onSetActive={setActive}
-        active={appState.activeScratch}
-    />
+<Panel id="panel-right" title="Scratch Pad">
+    <Tree>
+        {#each appState.scratch as file}
+            <Leaf onSelect={() => setActive(file)} active={appState.activeScratch === file}>
+                {file}
+            </Leaf>
+        {/each}
+    </Tree>
     <button onclick={handleNewScratch}>New Scratch</button>
-</div>
+</Panel>
 
 <style>
-    .title {
-        padding: 0 10px;
-        border-bottom: 1px solid #fff2;
-        font-weight: bold;
-    }
 </style>

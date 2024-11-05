@@ -48,7 +48,7 @@ h1 {
     "footer footer footer footer"
   ;
   grid-template-rows: max-content 1fr 1fr max-content;
-  grid-template-columns: max-content 1fr 1fr max-content;
+  grid-template-columns: minmax(300px, max-content) 1fr 1fr minmax(300px, max-content);
 
 }
 
@@ -71,4 +71,25 @@ button {
   &:focus-visible {
     outline: 4px auto -webkit-focus-ring-color;
   }
+}
+
+header {
+  grid-area: header;
+  background: rgb(23, 23, 23);
+}
+
+.panel {
+  width: 300px;
+}
+
+#panel-left {
+  grid-area: panel-left;
+}
+
+#panel-right {
+  grid-area: panel-right;
+}
+
+footer {
+  grid-area: footer;
 }

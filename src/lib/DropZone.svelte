@@ -1,9 +1,11 @@
 <script lang="ts">
-    import type { ComponentProps } from "svelte";
     import { store } from "./store";
+    import XLSX from "xlsx";
+    import type { HTMLBaseAttributes } from "svelte/elements";
 
-    let { children }: ComponentProps<any> = $props();
+    const { children }: HTMLBaseAttributes = $props();
     let dragover = $state(false);
+    // sheetUtils.sheet_to_csv()
 
     const handleFile = async (file: File) => {
         console.log(`file name = ${file.name} [Type: ${file.type}]`);
@@ -11,8 +13,13 @@
         switch (file.type) {
             case "text/csv": {
                 await store.importFile(file);
-
-                // appState.currentTable = ret.data as unknown[][];
+                break;
+            }
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                const workbook = XLSX.read(await file.arrayBuffer());
+                for (const [name, sheet] of Object.entries(workbook.Sheets)) {
+                    await store.import(`${name}.csv`, XLSX.utils.sheet_to_csv(sheet));
+                }
                 break;
             }
             default: {
